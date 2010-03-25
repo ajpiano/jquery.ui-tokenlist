@@ -10,8 +10,15 @@
 (function($) {
 
 $.widget('ui.tokenlist', {
+	options: {
+		split: /\s*,\s*/,
+		join: ', ',
+		removeTip: "Remove Item",
+		duplicates: false,
+		validate: false // Maybe false, an array of allowed values, or a validation function
+	},
 
-	_init: function() {
+	_create: function() {
 		var self = this, key = $.ui.keyCode;
 
 		if ( !this.options.items ) {
@@ -41,7 +48,8 @@ $.widget('ui.tokenlist', {
 				.addClass(this.widgetBaseClass + ' ui-widget ui-widget-content ui-helper-clearfix')
 
 				.bind('keydown.' + this.widgetName, function(ev) {
-					var focus, disabled = self._getData('disabled');
+					var focus, disabled = self.option('disabled');
+					var stop = true;
 
 					switch (ev.keyCode) {
 					case key.LEFT:
@@ -87,7 +95,7 @@ $.widget('ui.tokenlist', {
 
 				// Delete the item if the button is clicked
 				.bind('click.' + this.widgetName, function(ev) {
-					if (!self._getData('disabled')) {
+					if (!self.option('disabled')) {
 						if ($(ev.target).is('.'+self.widgetBaseClass+'-remove')) {
 							self._removeItem(ev.target);
 						}
@@ -136,12 +144,12 @@ $.widget('ui.tokenlist', {
 		}
 	},
 
-	_setData: function(key, value) {
-		$.widget.prototype._setData.apply(this, arguments);
-
+	_setOption: function(key, value) {
 		if (key === 'disabled') {
 			this.inputElem[0].disabled = value;
 		}
+
+		$.Widget.prototype._setOption.apply( this, arguments );
 	},
 
 	input: function() {
@@ -149,7 +157,7 @@ $.widget('ui.tokenlist', {
 	},
 
 	items: function() {
-		return this._getData('items');
+		return this.option('items');
 	},
 
 	empty: function() {
@@ -177,8 +185,8 @@ $.widget('ui.tokenlist', {
 
 	add: function(newItems, noChange) {
 		var items = this.items(),
-			unique = !this._getData('duplicates'),
-			validate = this._getData('validate'),
+			unique = !this.option('duplicates'),
+			validate = this.option('validate'),
 			added = [],
 			self = this;
 
@@ -220,7 +228,7 @@ $.widget('ui.tokenlist', {
 			button =
 				$('<span>x</span>')
 					.addClass(this.widgetBaseClass+'-remove ui-icon ui-icon-close')
-					.attr('alt', this._getData('removeTip'));
+					.attr('alt', this.option('removeTip'));
 
 		return $('<li/>')
 			.insertBefore(input)
@@ -245,11 +253,11 @@ $.widget('ui.tokenlist', {
 	},
 
 	_parse: function(value) {
-		return (value || '').split(this._getData('split'));
+		return (value || '').split(this.option('split'));
 	},
 
 	_stringify: function(items) {
-		return items.join(this._getData('join'));
+		return items.join(this.option('join'));
 	},
 
 	_change: function() {
@@ -263,16 +271,7 @@ $.widget('ui.tokenlist', {
 });
 
 $.extend($.ui.tokenlist, {
-	getter: "add input items value",
-	version: "@VERSION",
-
-	defaults: {
-		split: /\s*,\s*/,
-		join: ', ',
-		removeTip: "Remove Item",
-		duplicates: false,
-		validate: false // Maybe false, an array of allowed values, or a validation function
-	}
+	version: "@VERSION"
 });
 
 })(jQuery);
